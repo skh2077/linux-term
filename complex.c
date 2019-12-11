@@ -114,7 +114,7 @@ int __init hello_module_init(void)
 {
 	
 	spin_lock_init(&lock);
-	printk("Ours Init\n");
+	printk("Init\n");
 	INIT_LIST_HEAD(&my_list);
 	//INIT_LIST_HEAD(&my_list2);
 
@@ -144,9 +144,39 @@ int __init hello_module_init(void)
 	et3 = ktime_get_ns();
 
 	//printk("insert time : %llu ns \n", et1 - st1);
-	printk("traverse time : %llu ns \n", et2-st2);
+	printk("Ours traverse time : %llu ns \n", et2-st2);
 	//printk("delete time : %llu ns \n", et3-st3);
 	//printk("total time : %llu ns \n", et3-st3+et2-st2+et1-st1);
+	st1 = ktime_get_ns();
+
+        //i=0;
+        thread1 = kthread_run(insert, NULL, "insert");
+
+        et1 = ktime_get_ns();
+
+
+        st2 = ktime_get_ns();
+
+        thread1 = kthread_run(search, NULL, "search");
+        thread2 = kthread_run(search, NULL, "search");
+
+        et2 = ktime_get_ns();
+
+
+        st3 = ktime_get_ns();
+        /*      
+        current_node = list_first_entry(&my_list, struct my_node, list);
+        tmp = list_next_entry(current_node, list);
+        */
+        thread1 = kthread_run(delete, NULL, "delete");
+
+        et3 = ktime_get_ns();
+
+        //printk("insert time : %llu ns \n", et1 - st1);
+        printk("Origin traverse time : %llu ns \n", et2 - st2);
+        //printk("delete time : %llu ns \n", et3-st3);
+        //printk("total time : %llu ns \n", et3-st3+et2-st2+et1-st1);
+
 	return 0;
 }
 

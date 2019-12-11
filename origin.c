@@ -24,12 +24,10 @@ int i;
 u64 st1, et1, st2, et2, st3, et3;
 
 static int insert(void *data){
-	for (i = 0; i < 100000; i++){
-		spin_lock(&lock);
+	for(i=0; i < 100000; i++){
 		struct my_node *new = kmalloc(sizeof(struct my_node), GFP_KERNEL);
 		new->data = i;
 		list_add(&new->list, &my_list);
-		spin_unlock(&lock);	
 	}
 	do_exit(0);
 }
@@ -37,7 +35,6 @@ static int insert(void *data){
 static int search(void *data){
 	list_for_each_entry(current_node, &my_list, list){
 		spin_lock(&lock);
-		//printk("1\n");	
 		spin_unlock(&lock);
 	}
 	do_exit(0);
@@ -45,31 +42,37 @@ static int search(void *data){
 
 static int delete(void *data){
 	list_for_each_entry_safe(current_node, tmp, &my_list, list){
-		spin_lock(&lock);
 		list_del(&current_node->list);
 		kfree(current_node);
-		spin_unlock(&lock);
 	}
 	//printk("all deleted\n");
 	do_exit(0);
 }
 
+/*
+static int delete(void *data){
+	while(&current_node != (&my_list)){
+		list_del(&current_node->list);
+		kfree(current_node);
+		current_node = tmp, tmp = list_next_entry(tmp, list);
+	}
+	//printk("all deleted\n");
+	do_exit(0);
+}*/
 
 int __init hello_module_init(void)
 {
 	
 	spin_lock_init(&lock);
-	printk("Existing Init\n");
+	printk("Origin Init\n");
 	INIT_LIST_HEAD(&my_list);
-
 	st1 = ktime_get_ns();
 
+	//i=0;
 	thread1 = kthread_run(insert, NULL, "insert");
-	thread2 = kthread_run(insert, NULL, "insert");
 
 	et1 = ktime_get_ns();
 
-	printk("insert time : %llu ns \n", et1 - st1);
 
 	st2 = ktime_get_ns();
 
@@ -78,17 +81,20 @@ int __init hello_module_init(void)
 
 	et2 = ktime_get_ns();
 
-	printk("traverse time : %llu ns \n", et2 - st2);
 
 	st3 = ktime_get_ns();
-
+	/*	
+	current_node = list_first_entry(&my_list, struct my_node, list);
+	tmp = list_next_entry(current_node, list);
+	*/
 	thread1 = kthread_run(delete, NULL, "delete");
-	thread2 = kthread_run(delete, NULL, "delete");
 
 	et3 = ktime_get_ns();
 
-	printk("delete time : %llu ns \n", et3-st3);
-	printk("total time : %llu ns \n", et3-st1);
+	//printk("insert time : %llu ns \n", et1 - st1);
+	printk("traverse time : %llu ns \n", et2 - st2);
+	//printk("delete time : %llu ns \n", et3-st3);
+	//printk("total time : %llu ns \n", et3-st3+et2-st2+et1-st1);
 	return 0;
 }
 
