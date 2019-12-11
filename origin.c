@@ -16,7 +16,7 @@ struct my_node{
 };
 
 spinlock_t lock;
-struct task_struct *thread1;
+struct task_struct *thread1, *thread2;
 struct list_head my_list;
 struct my_node *tmp;
 struct my_node *current_node;
@@ -65,6 +65,7 @@ int __init hello_module_init(void)
 	st1 = ktime_get_ns();
 
 	thread1 = kthread_run(insert, NULL, "insert");
+	thread2 = kthread_run(insert, NULL, "insert");
 
 	et1 = ktime_get_ns();
 
@@ -73,6 +74,7 @@ int __init hello_module_init(void)
 	st2 = ktime_get_ns();
 
 	thread1 = kthread_run(search, NULL, "search");	
+	thread2 = kthread_run(search, NULL, "search");	
 
 	et2 = ktime_get_ns();
 
@@ -81,6 +83,7 @@ int __init hello_module_init(void)
 	st3 = ktime_get_ns();
 
 	thread1 = kthread_run(delete, NULL, "delete");
+	thread2 = kthread_run(delete, NULL, "delete");
 
 	et3 = ktime_get_ns();
 

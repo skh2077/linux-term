@@ -1,5 +1,5 @@
 #---------Makefile ---------#
-obj-m := test.o hello-2.o term.o origin.o
+obj-m := hello-2.o term.o origin.o
 
 KERNEL_DIR := /lib/modules/$(shell uname -r)/build
 PWD := $(shell pwd)
